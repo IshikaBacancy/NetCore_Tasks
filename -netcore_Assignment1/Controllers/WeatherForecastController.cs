@@ -106,10 +106,5 @@ namespace _netcore_Assignment1.Controllers
                     return BadRequest(new { Error = ex.Message });
                 }
             }
-
-
-
-
-
-        }
+         }
 }
