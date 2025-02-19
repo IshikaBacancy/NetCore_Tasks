@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using System.Text.Json;
 
-namespace _netcore_Assignment1.Controllers
+namespace netcore_day1.Controllers
 {
     [ApiController]
     [Route("[controller]")]
@@ -13,14 +14,16 @@ namespace _netcore_Assignment1.Controllers
         };
 
         private readonly ILogger<WeatherForecastController> _logger;
+        
 
         public WeatherForecastController(ILogger<WeatherForecastController> logger)
         {
             _logger = logger;
         }
 
-        //[HttpGet(Name = "GetWeatherForecast")]
-        //public IEnumerable<WeatherForecast> Get()
+        //[HttpGet(Name = "GetWeatherForecast/{id}")]
+        //public int Get(int id)
+
         //{
         //    return Enumerable.Range(1, 5).Select(index => new WeatherForecast
         //    {
@@ -29,10 +32,11 @@ namespace _netcore_Assignment1.Controllers
         //        Summary = Summaries[Random.Shared.Next(Summaries.Length)]
         //    })
         //    .ToArray();
+        //    //return id;
         //}
 
         [HttpPost]
-        public IActionResult CreateForecast([FromBody] WeatherForecast forecast)
+        public IActionResult CreateForecast(WeatherForecast forecast)
         {
             try
             {
@@ -49,11 +53,11 @@ namespace _netcore_Assignment1.Controllers
 
                 return Ok(true);
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 return BadRequest(false);
             }
-
+                
         }
 
         [HttpGet("GetForecasts")]
@@ -71,40 +75,41 @@ namespace _netcore_Assignment1.Controllers
 
 
                 string jsonstring = System.IO.File.ReadAllText("weatherData.txt");
-
+                
                 return Ok(jsonstring);
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 return BadRequest(false);
             }
-
+            
         }
+
+
     }
 
-     
-        public class OpenWeatherController : ControllerBase
+    public class OpenWeatherController : ControllerBase
+    {
+        private readonly OpenWeatherService _openWeatherService;
+
+        public OpenWeatherController(OpenWeatherService openWeatherService)
         {
-            private readonly OpenWeatherService _openWeatherService;
+            _openWeatherService = openWeatherService;
+        }
 
-            public OpenWeatherController(OpenWeatherService openWeatherService)
+        // API to get the closest weather station info (Latitude, Longitude, Country)
+        [HttpGet("GetLocation/{latitude}/{longitude}")]
+        public IActionResult GetLocation(double latitude, double longitude)
+        {
+            try
             {
-                _openWeatherService = openWeatherService;
+                var stationInfo = _openWeatherService.GetClosestStationInfo(latitude, longitude);
+                return Ok(stationInfo);
             }
-
-            
-            [HttpGet("GetLocation/{latitude}/{longitude}")]
-            public IActionResult GetLocation(double latitude, double longitude)
+            catch (Exception ex)
             {
-                try
-                {
-                    var stationInfo = _openWeatherService.GetClosestStationInfo(latitude, longitude);
-                    return Ok(stationInfo);
-                }
-                catch (Exception ex)
-                {
-                    return BadRequest(new { Error = ex.Message });
-                }
+                return BadRequest(new { Error = ex.Message });
             }
-         }
+        }
+    }
 }
